@@ -25,36 +25,8 @@ activityData<-read.csv("activity.csv")
 activityData$date<-as.Date(as.character(activityData$date))
 activity<-na.omit(activityData)
 
-library(ggplot2)
-```
-
-```
-## Warning: package 'ggplot2' was built under R version 3.4.4
-```
-
-```r
-library(dplyr)
-```
-
-```
-## Warning: package 'dplyr' was built under R version 3.4.4
-```
-
-```
-## 
-## Attaching package: 'dplyr'
-```
-
-```
-## The following objects are masked from 'package:stats':
-## 
-##     filter, lag
-```
-
-```
-## The following objects are masked from 'package:base':
-## 
-##     intersect, setdiff, setequal, union
+suppressMessages(library(ggplot2))
+suppressMessages(library(dplyr))
 ```
 ### I. What is the mean total number of steps taken per day?
 
@@ -71,7 +43,7 @@ stepsDate<-summarize(activity_bydate,dailySteps=sum(steps,na.rm=TRUE))
 hist(stepsDate$dailySteps,xlab="daily steps",ylab="count",main="Total Steps Taken per Day",col="light blue")
 ```
 
-![plot of chunk Task one](figure/Task one-1.png)
+![plot of chunk TaskOne](figure/TaskOne-1.png)
 
 ```r
 dev.off()
@@ -104,7 +76,7 @@ stepsInterval <- summarize(activity_byinterval,meanintervalSteps=mean(steps,na.r
 with(stepsInterval,plot(interval,meanintervalSteps,type="l",xlab="interval steps",ylab="average steps",main="Average Steps Taken per 5 Min Interval"))
 ```
 
-![plot of chunk Task two](figure/Task two-1.png)
+![plot of chunk TaskTwo](figure/TaskTwo-1.png)
 
 ```r
 dev.off()
@@ -173,7 +145,7 @@ stepsDate<-summarize(activity_bydate,dailySteps=sum(steps,na.rm=TRUE))
 hist(stepsDate$dailySteps,xlab="daily steps",ylab="count",main="Total Steps Taken per Day",col="light blue")
 ```
 
-![plot of chunk Task three - part three](figure/Task three - part three-1.png)
+![plot of chunk TaskThree3](figure/TaskThree3-1.png)
 
 ```r
 dev.off()
@@ -207,7 +179,7 @@ p <- ggplot(stepsInterval,aes(interval,meanintervalSteps))+geom_line()
 p+facet_grid(dayType~.)+labs(x="interval",y="mean steps",title="Mean Steps per Interval for Weekdays vs Weekends")+theme(legend.position = c(0.16, 0.85))
 ```
 
-![plot of chunk Task four](figure/Task four-1.png)
+![plot of chunk TaskFour](figure/TaskFour-1.png)
 
 ```r
 dev.off()

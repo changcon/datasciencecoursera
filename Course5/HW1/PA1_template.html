@@ -143,18 +143,10 @@ $(document).ready(function () {
 activityData$date&lt;-as.Date(as.character(activityData$date))
 activity&lt;-na.omit(activityData)
 
-library(ggplot2)</code></pre>
+suppressMessages(library(ggplot2))</code></pre>
 <pre><code>## Warning: package 'ggplot2' was built under R version 3.4.4</code></pre>
-<pre class="r"><code>library(dplyr)</code></pre>
+<pre class="r"><code>suppressMessages(library(dplyr))</code></pre>
 <pre><code>## Warning: package 'dplyr' was built under R version 3.4.4</code></pre>
-<pre><code>## 
-## Attaching package: 'dplyr'</code></pre>
-<pre><code>## The following objects are masked from 'package:stats':
-## 
-##     filter, lag</code></pre>
-<pre><code>## The following objects are masked from 'package:base':
-## 
-##     intersect, setdiff, setequal, union</code></pre>
 </div>
 <div id="i.-what-is-the-mean-total-number-of-steps-taken-per-day" class="section level3">
 <h3>I. What is the mean total number of steps taken per day?</h3>

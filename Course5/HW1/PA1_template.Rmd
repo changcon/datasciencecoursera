@@ -26,8 +26,8 @@ activityData<-read.csv("activity.csv")
 activityData$date<-as.Date(as.character(activityData$date))
 activity<-na.omit(activityData)
 
-library(ggplot2)
-library(dplyr)
+suppressMessages(library(ggplot2))
+suppressMessages(library(dplyr))
 ```
 ### I. What is the mean total number of steps taken per day?
 
@@ -36,7 +36,7 @@ library(dplyr)
 * Use summarize on the resulting dataset to get total steps per day  
 * Plot histogram and calculate mean and median. 
 
-```{r Task one}
+```{r TaskOne}
 activity_bydate<-group_by(activity,date)
 stepsDate<-summarize(activity_bydate,dailySteps=sum(steps,na.rm=TRUE))
 
@@ -56,7 +56,7 @@ The mean number of steps is `r meanSteps` steps while the median number of steps
 * Plot scatterplot and calculate max and mean average interval steps. 
 * Identify which interval has the max steps
 
-```{r Task two}
+```{r TaskTwo}
 activity_byinterval <- group_by(activity,interval)
 stepsInterval <- summarize(activity_byinterval,meanintervalSteps=mean(steps,na.rm=TRUE))
 
@@ -76,7 +76,7 @@ The interval with the max number of steps is `r IntervalMax$interval`.
 * Add an NA indicator to stepsInterval to make a matching indicator for merging
 * Add an NA indicator to rows of the original dataset with empty rows
 
-```{r Task three - part one}
+```{r TaskThree1}
 sum(is.na(activityData))
 stepsInterval$NAind<-"TRUE"
 activityData$NAind<-is.na(activityData$steps)
@@ -86,7 +86,7 @@ activityData$NAind<-is.na(activityData$steps)
 * Match based on the interval and NA ind to get a dataset, activitySubNew, that contains just the NA observations with the missing data imputed in. Drop extra columns to match the original dataset. 
 * Reorder the columns of the resulting dataset, activitySubNew and merge it with the original dataset, activityData.
 
-```{r Task three - part two}
+```{r TaskThree2}
 activitySubNew<-merge(activityData,stepsInterval,by=c("interval","NAind"))
 activitySubNew$steps<-activitySubNew$meanintervalSteps
 activitySubNew$meanintervalSteps<-NULL
@@ -99,7 +99,7 @@ activityNew<-rbind(activitySubNew, activity)
 * Plot histogram and calculate mean and median average steps per day. 
 * Compare mean and median with those previous calculated with the cleaned up dataset removing NAs.
 
-```{r Task three - part three}
+```{r TaskThree3}
 activity_bydate<-group_by(activityNew,date)
 stepsDate<-summarize(activity_bydate,dailySteps=sum(steps,na.rm=TRUE))
 
@@ -116,7 +116,7 @@ The mean number of steps is `r meanSteps` while the median number of steps is `r
 * Group by the interval and new factor variable
 * Plot a panel plot breaking down mean steps by interval separately for weekend vs weekday days.
 
-```{r Task four}
+```{r TaskFour}
 activityNew$dayType<-ifelse(weekdays(activityNew$date) %in% c("Saturday","Sunday"),"weekend","weekday")
 activityNew$dayType<-as.factor(activityNew$dayType)
 
