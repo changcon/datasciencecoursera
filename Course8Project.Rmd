@@ -1,0 +1,101 @@
+---
+title: 'Course 8 Project: Prediction'
+author: "Connie Chang"
+date: "August 16, 2018"
+output:
+  html_document: default
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(fig.width=7.2, fig.height=5.2, echo=TRUE)
+library(caret)
+library(lattice)
+library(ggplot2)
+```
+
+### Executive Summary
+This project will explore prediction in a classification problem where the target variable has five possible values and the available explanatory variables are numerous. Using the caret package, we will split our dataset into training and testing cohorts to search for an optimal model through successive re-sampling (done automatically via the train function in caret). We will test two overall methodologies -- linear discriminant analysis and random forest.
+
+The dataset is the Human Activity Recognition dataset - which uses several personal devices (arm sensors, belt sensors, etc) - to predict if a participant is performing a weight lifting exercise correctly.The $\color{blue}{\text{classe}}$ variable takes 5 possible values -- ranging from class $\color{blue}{\text{A}}$, exercise performed correctly, to variously incorrectly performed possibilities (e.g., Class $\color{blue}{\text{E}}$ corresponds to the participant throwing his hops to the front). For more information, please refer to: http://web.archive.org/web/20161224072740/http:/groupware.les.inf.puc-rio.br/har#dataset
+
+
+### I. Exploratory Analysis
+We first load the data and run a str command on it to examine its contents. There are 19,622 observations of 160 variables. From the first 20 variables, we can see that the first several variables are not expected to be related to the classe variable and therefore we will delete them from our dataset in a bit. 
+
+
+```{r exploratory1,message=FALSE, warning=FALSE, echo=FALSE}
+set.seed(3002)
+download.file("https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv","train.csv")
+train<-read.csv("C:\\Users\\ub67350\\Documents\\train.csv")
+
+download.file("https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv","test.csv")
+test<-read.csv("C:\\Users\\ub67350\\Documents\\test.csv")
+
+str(train,list.len=20)
+
+```
+
+We also note that some variables seem to have a high number of missing values (around 90%). We take out the columns/variables with a signficant number of missing data (more than 90%).Then we partition our data into testing and training sets.
+
+```{r exploratory2, message=FALSE,warning=FALSE}
+train2<-train[,colMeans(is.na(train))< 0.9]
+
+inTrain<-createDataPartition(y=train2$classe,p=0.70,list=FALSE)
+training<-train2[inTrain,]
+testing<-train2[-inTrain,]
+
+training2<-training[,8:93]
+testing2<-testing[,8:93]
+
+```
+Finally, we remove variables with near zero variance to reduce our explanatory variable field down further.This takes down our original 160 potential variables to 52 (plus one is the target variable). We are finally ready to begin fitting potential models.
+
+```{r exploratory3,message=FALSE,warning=FALSE,echo=FALSE}
+nzv<-nearZeroVar(training2,saveMetrics=TRUE)
+training3<-training2[,nzv$nzv==FALSE]
+```
+
+### II. First Try at Fitting
+First, we use the train function in the caret package to train a linear discriminant analysis model. Once we get our model, we use it to predict on the test data (which we partitioned early from the full train dataset). We test its accuracy in classifying the 5 states of classe by looking at its confusion matrix. 
+
+We see from the table that the number of correct classifications is still high compared to the incorrect classifications. For example, the number of cases predicted to be $\color{blue}{\text{A}}$ correctly by the model is 1,373 which is much higher than the highest number of cases misidentified as another class (class $\color{blue}{\text{C}}$ at 147 cases). Similarly for other cases, the off-diagonal elements, which represent misclassification, are not negligible in size. This is confirmed by the accuracy of the model, given as $\color{blue}{\text{0.70}}$.
+
+```{r fitting}
+
+fitlda<-train(classe~.,method="lda",data=training3)
+predlda<-predict(fitlda,testing)
+
+confusionMatrix(predlda,testing$classe)$table
+confusionMatrix(predlda,testing$classe)$overall[1]
+
+```
+### II. Second Try at Fitting
+We next try the random forest methodology. We define our method of re-sampling as $\color{blue}{\text{cv}}$, cross validation, and ask that the function perform a 3-fold cross validation. We then test its out of sample accuracy by calculating the confusion matrix that compares the predicted values of the model fitted on the testing dataset with the true values of the target variable given by $\color{blue}{\text{testing\$class}}$. 
+
+We see that the out-of-sample accuracy is excellent at $\color{blue}{\text{0.993}}$.Similarly, the confusion matrix show very few cases that are misclassified.
+```{r fitting2}
+fitControl<-trainControl(method="cv",number=3)
+rfFit<-train(classe~.,method="rf", trControl=fitControl,data=training3)
+
+predrf<-predict(rfFit,testing)
+
+confusionMatrix(predrf,testing$classe)$table
+confusionMatrix(predrf,testing$classe)$overall[1]
+```
+
+We take a look at the final model and see that the accuracy peaks when the $\color{blue}{\text{mtry}}$ parameter is set to 27 predictors. We also plot out the variable importance graph to see which variables are influential in determining $\color{blue}{\text{classe}}$.
+
+```{r fitting2b}
+rfFit$finalModel
+
+plot(varImp(rfFit))
+```
+
+
+### IV. Conclusion
+Our final model is a random forest with 500 trees and an optimal mtry of 27. Out of sample accuracy is $\color{blue}{\text{0.993}}$, leading us to believe it would do a good job of predicting $\color{blue}{\text{classe}}$ on the held out test sample of 20 observations. And indeed, the model was able to predict 20 out of 20 cases.
+
+```{r conclusion}
+predrf_val<-predict(rfFit,test)
+predrf_val
+```
+
