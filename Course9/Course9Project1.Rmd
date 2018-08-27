@@ -1,0 +1,25 @@
+---
+title: "Course9Project1"
+author: "Connie Chang"
+date: "August 26, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning=FALSE, message=FALSE)
+```
+
+## Jersey City Haunts
+
+
+```{r cars}
+library(leaflet)
+
+df<-data.frame(lat=c(40.71929,40.721067,40.721495, 40.7178,40.7140,40.7206,40.71834,40.7212,40.7202),lng=c(-74.042214,-74.045053,-74.045898,-74.0442,-74.0381,-74.0438,-74.043649,-74.0443,-74.0436),name=c("HOME","P&K Fruit Market","Saigon Cafe","Razza","Lighthorse Tavern","Skinner's Loft","Beechwood Cafe","Talde","Two Boots Pizza" ),col=c("red","blue","green","green","green","green","green","green","green"))
+
+JCSites <- c("<a href='https://www.grovepointe.com/'>HOME</a>","<a href='https://www.yelp.com/biz/p-and-k-food-market-jersey-city-2'>P&K Fruit Market</a>","<a href='http://saigoncafejc.com/wordpress//'>Saigon Cafe</a>","<a href='https://razzanj.com/'>Razza</a>","<a href='https://www.lighthorsetavern.com/'>Lighthorse Tavern</a>","<a href='https://www.skinnersloft.com/'>Skinner's Loft</a>","<a href='http://www.cafebeechwood.com/'>Beechwood Cafe</a>","<a href='http://www.taldejerseycity.com/'>Talde</a>","<a href='http://twoboots.com/location/jersey-city/'>Two Boots Pizza</a>")
+
+
+df %>% leaflet() %>% addTiles() %>% addCircleMarkers(weight=4,color=df$col,popup=JCSites) %>% addLegend(labels=c("Home","Grocer","Restaurant"),colors=c("red","blue","green"))
+```
+
