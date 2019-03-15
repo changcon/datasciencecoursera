@@ -1,0 +1,51 @@
+
+
+dfmfreq1<-textstat_frequency(dfmtoken1)
+dfmfreq2<-textstat_frequency(dfmtoken2)
+dfmfreq3<-textstat_frequency(dfmtoken3)
+dfmfreq4<-textstat_frequency(dfmtoken4)
+
+df2lkp <- function( df_in ) {
+  dt_out <- as.data.table( df_in[ , c( "feature", "frequency" ) ] )
+  dt_out <- dt_out[ , c( "subfeature", "prediction" ) := transpose( strsplit( feature, "_(?=[^_]+$)", perl = TRUE ) ) ]
+  dt_out <- setkey( dt_out, subfeature, frequency )
+  dt_out <- dt_out[ , .SD[ .N ], by = "subfeature" ]
+  dt_out <- dt_out[ , c( "feature", "frequency" ) := NULL ]
+  dt_out <- setnames( dt_out, "subfeature", "feature" )
+  
+  dt_out
+}
+
+# Creating one look up table out of bigrams, trigrams, and fourgrams
+
+lkp_dt <- data.table( feature = character(), prediction = character() )
+lkp_dt <- rbindlist( list( lkp_dt, df2lkp( readRDS( "dfmfreq2.rds" ) ) ) )
+lkp_dt <- rbindlist( list( lkp_dt, df2lkp( readRDS( "dfmfreq3.rds" ) ) ) )
+lkp_dt <- rbindlist( list( lkp_dt, df2lkp( readRDS( "dfmfreq4.rds" ) ) ) )
+lkp_dt <- setkey( lkp_dt, feature )
+
+
+NextWordPredict <- function( lkp_str, lkp_dt ) {
+  lkp_vec <- strsplit( lkp_str, "\\s+" )[[ 1 ]]
+  pred <- NA_character_
+  while( length( lkp_vec ) > 0 && is.na( pred ) ) {
+    lkp_str <- paste0( lkp_vec, collapse = "_" )
+    lkp_vec <- tail( lkp_vec, -1 )
+    pred <- lkp_dt[ lkp_str, prediction, nomatch = NA ]
+  }
+  
+  if( is.na(pred) ) pred<-"No word found"
+
+  pred
+}
+	
+
+#Example
+NextWordPredict("i love you", lkp_dt)
+
+#Save data table
+
+saveRDS(lkp_dt,file="lkp_dt.rds")
+
+# Reading in data table
+# lkp_dt<-readRDS(file="lkp_dt.rds")
